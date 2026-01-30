@@ -67,6 +67,11 @@ select, input {
   color: #c0392b;
   font-weight: bold;
 }
+.rules {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #333;
+}
 </style>
 </head>
 <body>
@@ -123,7 +128,14 @@ const text = {
     base: "Базовый",
     super: "Суперконтракт",
     statusOk: "Оплата в норме",
-    statusLate: "Просрочка: должно быть"
+    statusLate: "Просрочка: должно быть оплачено минимум",
+    toPay: "Нужно доплатить",
+    total: "Общая сумма контракта",
+    rulesTitle: "Правила оплаты для учебного года",
+    rule25: "До 31.10.2025",
+    rule50: "До 31.12.2025",
+    rule75: "До 28.02.2026",
+    rule100: "До 30.04.2026"
   },
   uz: {
     title: "Kontrakt to‘lovi kalkulyatori",
@@ -134,12 +146,19 @@ const text = {
     paid: "To‘langan summa (so‘m)",
     normal: "Oddiy",
     stipend: "Stipendiyali",
-    vnj: "Chet ellik (VNH)",
+    vnj: "Chet ellik (Doimiy yashashga ruxsatnoma)",
     visa: "Chet ellik (Viza)",
-    base: "Asosiy",
+    base: "Bazaviy",
     super: "Super-kontrakt",
     statusOk: "To‘lov me’yorida",
-    statusLate: "Kechikish: talab qilinadi"
+    statusLate: "Kechikish: talab qilingan minimum",
+    toPay: "Qo‘shimcha to‘lash kerak",
+    total: "Shartnoma umumiy summasi",
+    rulesTitle: "O'quv yili uchun to'lov qoidalari",
+    rule25: "31.10.2025 gacha",
+    rule50: "31.12.2025 gacha",
+    rule75: "28.02.2026 gacha",
+    rule100: "30.04.2026 gacha"
   }
 };
 const normalPrices = {
@@ -245,6 +264,7 @@ function update() {
   const acadStartYear = month >= 8 ? year : year - 1;
   const year1 = acadStartYear;
   const year2 = acadStartYear + 1;
+  const acadYear = `${year1}-${year2}`;
   const d1 = new Date(`${year1}-10-31T23:59:59`);
   const d2 = new Date(`${year1}-12-31T23:59:59`);
   const d3 = new Date(`${year2}-02-28T23:59:59`);
@@ -260,16 +280,26 @@ function update() {
     requiredPercent = 25;
   }
   const requiredAmount = Math.ceil(total * requiredPercent / 100);
+  let statusHtml = '';
   if (paid >= requiredAmount) {
-    output.innerHTML = `<span class="ok">${text[lang].statusOk}</span>`;
+    statusHtml = `<span class="ok">${text[lang].statusOk}</span>`;
   } else {
-    output.innerHTML = `<span class="late">${text[lang].statusLate} ${formatNumber(requiredAmount)}</span>`;
+    const toPay = requiredAmount - paid;
+    statusHtml = `<span class="late">${text[lang].statusLate} ${formatNumber(requiredAmount)} сум</span><br>${text[lang].toPay}: ${formatNumber(toPay)} сум`;
   }
+  const rulesHtml = `
+    <div class="rules">
+      <strong>${text[lang].rulesTitle} ${acadYear}:</strong><br>
+      - ${text[lang].rule25}.${year1}: 25% (${formatNumber(Math.ceil(total * 0.25))} сум)<br>
+      - ${text[lang].rule50}.${year1}: 50% (${formatNumber(Math.ceil(total * 0.5))} сум)<br>
+      - ${text[lang].rule75}.${year2}: 75% (${formatNumber(Math.ceil(total * 0.75))} сум)<br>
+      - ${text[lang].rule100}.${year2}: 100% (${formatNumber(total)} сум)
+    </div>
+  `;
+  output.innerHTML = `${statusHtml}<br><br>${text[lang].total}: ${formatNumber(total)} сум${rulesHtml}`;
 }
 </script>
 </body>
 </html>
 
-</body>
-</html>
 
