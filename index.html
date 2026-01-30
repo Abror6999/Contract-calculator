@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Калькулятор контракта</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  padding: 20px;
+}
+.container {
+  max-width: 500px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  margin: auto;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+h2 {
+  text-align: center;
+}
+select, input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 8px;
+}
+.result {
+  margin-top: 15px;
+  background: #eef2f5;
+  padding: 10px;
+  border-radius: 8px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h2>Калькулятор оплаты контракта</h2>
+
+<label>Тип студента</label>
+<select id="type" onchange="update()">
+  <option value="">Выберите</option>
+  <option value="normal">Обычный</option>
+  <option value="stipend">Со стипендией</option>
+  <option value="foreign_vnj">Иностранец (ВНЖ)</option>
+  <option value="foreign_visa">Иностранец (Виза)</option>
+</select>
+
+<label>Курс</label>
+<select id="course" onchange="update()">
+  <option value="">Выберите</option>
+  <option value="1">1 курс</option>
+  <option value="2">2 курс</option>
+  <option value="3">3 курс</option>
+  <option value="4">4 курс</option>
+</select>
+
+<label>Тип контракта</label>
+<select id="contract" onchange="update()">
+  <option value="base">Базовый</option>
+  <option value="super">Суперконтракт</option>
+</select>
+
+<label>Уже оплачено (сум)</label>
+<input type="number" id="paid" oninput="update()">
+
+<div class="result" id="output"></div>
+</div>
+
+<script>
+function update() {
+  let type = document.getElementById("type").value;
+  let course = document.getElementById("course").value;
+  let contract = document.getElementById("contract").value;
+  let paid = Number(document.getElementById("paid").value || 0);
+
+  let total = 0;
+
+  if (type === "foreign_vnj") total = 38400000;
+  if (type === "foreign_visa") total = 44800000;
+
+  if (type === "normal") {
+    if (course == 1 && contract == "base") total = 33750000;
+    if (course == 1 && contract == "super") total = 146250000;
+    if (course == 2) total = 33750000;
+    if (course >= 3) total = 27301000;
+  }
+
+  if (type === "stipend") {
+    if (course == 1 && contract == "base") total = 40586020;
+    if (course == 1 && contract == "super") total = 153086020;
+    if (course == 2) total = 40586020;
+    if (course >= 3) total = 34137020;
+  }
+
+  if (!total) return;
+
+  let percent = ((paid / total) * 100).toFixed(2);
+
+  let p25 = Math.max(0, total * 0.25 - paid);
+  let p50 = Math.max(0, total * 0.50 - paid);
+  let p75 = Math.max(0, total * 0.75 - paid);
+  let p100 = Math.max(0, total - paid);
+
+  document.getElementById("output").innerHTML = `
+    <b>Общая сумма:</b> ${total.toLocaleString()} сум<br>
+    <b>Оплачено:</b> ${percent}%<br><br>
+    <b>До 25% (31.10):</b> ${p25.toLocaleString()}<br>
+    <b>До 50% (31.12):</b> ${p50.toLocaleString()}<br>
+    <b>До 75% (28.02):</b> ${p75.toLocaleString()}<br>
+    <b>До 100% (30.04):</b> ${p100.toLocaleString()}
+  `;
+}
+</script>
+
+</body>
+</html>
